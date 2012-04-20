@@ -108,9 +108,9 @@ class DefenseMain:
 					self.screen.fill((255, 255, 255), textpos)
 					self.screen.blit(text, textpos)
 			
-			things = self.sprites.draw(self.screen)
-			pygame.display.update(things)
 			self.sprites.clear(self.screen, self.background)
+			changes = self.sprites.draw(self.screen)
+			pygame.display.update(changes)
 			pygame.display.flip()
 	
 	def quitGame(self):
