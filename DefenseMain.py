@@ -8,6 +8,7 @@ import pygame
 import random
 import sys
 import menu
+import time
 
 if not pygame.font: print 'Warning, fonts disabled'
 if not pygame.mixer: print 'Warning, sound disabled'
@@ -59,6 +60,7 @@ class DefenseMain:
 		self.background = pygame.image.load(os.path.join('data', 'images', 'backgroundImage.png'))
 		self.background = pygame.transform.scale(self.background, (self.fWidth, self.fHeight))
 		#self.background = pygame.Surface(self.screen.get_size())
+		self.screen.blit(self.background, (0,0))
 		
 		clock = pygame.time.Clock()
 		while True:
@@ -89,8 +91,7 @@ class DefenseMain:
 				s.update(dTime)
 				
 			"""draw all text"""
-			self.screen.blit(self.background, (0,0))
-			if pygame.font:
+			if False:
 				font = pygame.font.Font(None, 36)
 				text = font.render("Pony TD", 1, (255, 45, 68))
 				textpos = text.get_rect(centerx=self.background.get_width()/2)
@@ -107,7 +108,9 @@ class DefenseMain:
 					self.screen.fill((255, 255, 255), textpos)
 					self.screen.blit(text, textpos)
 			
-			self.sprites.draw(self.screen)
+			things = self.sprites.draw(self.screen)
+			pygame.display.update(things)
+			self.sprites.clear(self.screen, self.background)
 			pygame.display.flip()
 	
 	def quitGame(self):
