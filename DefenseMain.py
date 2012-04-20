@@ -30,7 +30,7 @@ class DefenseMain:
 		self.enemies = pygame.sprite.Group()
 		self.message = ""
 	
-	def MainLoop(self):
+	def main(self):
 		pygame.mixer.music.load(os.path.join('data', 'audio', 'background.mp3'))
 		pygame.mixer.music.play()
 		
@@ -122,4 +122,4 @@ class DefenseMain:
 
 if __name__ == "__main__":
 	Main = DefenseMain()
-	Main.MainLoop()
+	Main.main()
