@@ -5,8 +5,8 @@ Created on Apr 19, 2012
 '''
 
 from helpers import *
-image = 0
 class Applejack(pygame.sprite.Sprite):
+	images = {}
 	'''
 	classdocs
 	'''
@@ -14,17 +14,18 @@ class Applejack(pygame.sprite.Sprite):
 
 	def __init__(self, dpTop):
 		pygame.sprite.Sprite.__init__(self)
-		self.x_dist = 5
-		self.y_dist = 5
 		self.appleTimer = 1000
 		self.dpTop = dpTop
 		# load applejack image
-		self.image, self.rect = load_image('applejack-64x64.png', -1)
-		#self.image = pygame.transform.scale(self.image, (64, 64))
-		#self.rect.size = (64, 64)
-		self.timeTilFire = 1000
+		if not Applejack.images:
+			Applejack.images['idle'] = pygame.image.load(os.path.join('data', 'images', 'applejack.png'))
+			Applejack.images['idle'].convert_alpha()
+			Applejack.images['idle'] = pygame.transform.scale(Applejack.images['idle'], (PONY_SIZE, PONY_SIZE))
 		
-		self.RANGE = 1000
+		self.image = Applejack.images['idle']
+		self.rect = self.image.get_rect()
+		self.timeTilFire = 1000
+		self.range = 500
 	
 	def place(self, (x,y)):
 		self.rect.center = (x,y)
@@ -36,7 +37,7 @@ class Applejack(pygame.sprite.Sprite):
 			self.fireApple()
 	
 	def fireApple(self):
-		targets = [e for e in self.dpTop.enemies if (Vec2d(e.rect.center) - Vec2d(self.rect.center)).get_length() < self.RANGE]
+		targets = self.dpTop.enemiesWithinRange(self.rect.center, self.range)
 		targets = sorted(targets, key=lambda e: e.health)
 		if targets:
 			ap = Apple(targets[0], self.dpTop)
@@ -44,17 +45,23 @@ class Applejack(pygame.sprite.Sprite):
 			self.dpTop.sprites.add(ap)
 
 class Apple(pygame.sprite.Sprite):
+	images = {}
 	def __init__(self, target, dpTop):
 		print "Apple created!"
 		pygame.sprite.Sprite.__init__(self)
-		self.image, self.rect = load_image('apple.png')
-		self.image.convert_alpha()
-		self.image = pygame.transform.scale(self.image, (16, 16))
-		self.rect.size = (16, 16)
+		
+		
+		if not Apple.images:
+			Apple.images['idle'] = pygame.image.load(os.path.join('data', 'images', 'apple.png'))
+			Apple.images['idle'].convert_alpha()
+			Apple.images['idle'] = pygame.transform.scale(Apple.images['idle'], (16, 16))
+		
+		self.image = Apple.images['idle']
+		self.rect = self.image.get_rect()
 		self.target = target
 		self.pos = Vec2d((0,0))
-		self.SPEED = 1000
-		self.HARM = 10
+		self.speed = 1000
+		self.harm = 10
 		self.dpTop = dpTop
 		
 	def place(self, (x,y)):
@@ -65,11 +72,11 @@ class Apple(pygame.sprite.Sprite):
 	def update(self, dTime):
 		if not self.target.alive():
 			self.kill()
-		velocity = (self.target.rect.center - self.pos).normalized()*self.SPEED
+		velocity = (self.target.rect.center - self.pos).normalized()*self.speed
 		ds = velocity*dTime*1.0/1000
 		self.pos += ds
 		self.place(self.pos)
 		for e in pygame.sprite.spritecollide(self, self.dpTop.enemies, False):
-			e.hurt(self.HARM)
+			e.hurt(self.harm)
 			self.kill()
 			break
