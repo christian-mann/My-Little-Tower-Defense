@@ -1,24 +1,25 @@
 
 import pygame
 from helpers import *
-from Queue import Queue
+from MovingSprite import MovingSprite
 import random
 
-class Parasprite(pygame.sprite.Sprite):
-	images = {}
-	def __init__(self):
-		pygame.sprite.Sprite.__init__(self)
-		self.waypoints = []
+class Parasprite(MovingSprite):
+	images = [os.path.join('data', 'images', "parasprite"+str(i)+".png") for i in xrange(1,5)]
+	images = [pygame.image.load(s) for s in images]
+	images = [pygame.transform.scale(i, (32, 32)) for i in images]
+	def __init__(self, dpTop):
+		MovingSprite.__init__(self, None, 200)
+		self.waypoints = dpTop.enemyPath[:]
 		
-		images = [os.path.join('data', 'images', "parasprite"+str(i)+"-32x32.png") for i in xrange(1,5)]
-		images = [pygame.image.load(s) for s in images]
-		images = [pygame.transform.scale(i, (32, 32)) for i in images]
+		self.image = random.choice(Parasprite.images)
 		
-		self.image = random.choice(images)
 		self.rect = self.image.get_rect()
 		self.speed = 200
 		self.health = 10
-		self.harm = 100
+		self.harm = 19
+		
+		self.dpTop = dpTop
 
 		self.pos = Vec2d((0,0))
 
@@ -33,12 +34,11 @@ class Parasprite(pygame.sprite.Sprite):
 			self.kill()
 	
 	def update(self, dTime):
-		if self.waypoints:
-			velocity = (self.waypoints[0] - self.pos).normalized()*self.speed
-			ds = velocity*dTime*1.0/1000
-			self.pos += ds
-			self.place(self.pos)
-			if self.rect.collidepoint(self.waypoints[0]):
+		MovingSprite.update(self, dTime)
+		if not self.target:
+			if self.waypoints:
+				self.target = self.waypoints[0]
 				del self.waypoints[0]
-		else:
-			self.kill()
+			else:
+				self.dpTop.health -= self.harm
+				self.kill()

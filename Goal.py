@@ -8,9 +8,8 @@ class Goal(pygame.sprite.Sprite):
         self.width = size.x
         self.height = size.y
         
-        self.image, self.rect = load_image("library.png")
-        self.image = pygame.transform.scale(self.image, (128, 128))
-        self.rect.size = (128, 128)
+        self.image = load_image("library.png", (128, 128))
+        self.rect = self.image.get_rect()
     
     def place(self, (x,y)):
         self.x, self.y = x*1.0, y*1.0

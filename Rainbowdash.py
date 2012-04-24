@@ -5,18 +5,19 @@ Created on Apr 19, 2012
 '''
 
 from helpers import *
-images = {}
-class Rainbowdash(pygame.sprite.Sprite):
+from Pony import Pony
+class Rainbowdash(Pony):
+	images = {}
+	cost = 100
+	description = "Foobar"
 	def __init__(self, dpTop):
-		pygame.sprite.Sprite.__init__(self)
+		Pony.__init__(self)
 		self.dpTop = dpTop
 		# load rainbowdash image
-		if not images:
-			images['idle'] = pygame.image.load(os.path.join('data', 'images', 'rainbowdash.png'))
-			images['idle'].convert_alpha()
-			images['idle'] = pygame.transform.scale(images['idle'], (PONY_SIZE, PONY_SIZE))
+		if not Rainbowdash.images:
+			Rainbowdash.images['idle'] = load_image('rainbowdash.png', (PONY_SIZE, PONY_SIZE))
 		
-		self.image = images['idle']
+		self.image = Rainbowdash.images['idle']
 		self.rect = self.image.get_rect()
 		self.timeTilFire = 1000
 		self.range = 500
@@ -27,7 +28,7 @@ class Rainbowdash(pygame.sprite.Sprite):
 	
 	def update(self, dTime):
 		self.timeTilFire -= dTime
-		if(self.timeTilFire <= 0):
+		if self.timeTilFire <= 0 and not self.ghost:
 			self.timeTilFire = 1000
 			self.attack()
 	
@@ -88,7 +89,8 @@ class RainbowTrail(pygame.sprite.Sprite):
 		pygame.sprite.Sprite.__init__(self)
 		self.pos = Vec2d(0.0,0.0)
 		self.timeout = timeout
-		self.image, self.rect = load_image('rainbowGradient.png')
+		self.image = load_image('rainbowGradient.png')
+		self.rect = self.image.get_rect()
 	
 	def update(self, dTime):
 		self.timeout -= dTime

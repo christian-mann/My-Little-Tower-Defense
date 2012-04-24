@@ -5,22 +5,21 @@ Created on Apr 19, 2012
 '''
 
 from helpers import *
-class Applejack(pygame.sprite.Sprite):
+from MovingSprite import MovingSprite
+from Pony import Pony
+class Applejack(Pony):
 	images = {}
-	'''
-	classdocs
-	'''
+	cost = 100
+	description = "foobar"
 
 
 	def __init__(self, dpTop):
-		pygame.sprite.Sprite.__init__(self)
+		Pony.__init__(self)
 		self.appleTimer = 1000
 		self.dpTop = dpTop
 		# load applejack image
 		if not Applejack.images:
-			Applejack.images['idle'] = pygame.image.load(os.path.join('data', 'images', 'applejack.png'))
-			Applejack.images['idle'].convert_alpha()
-			Applejack.images['idle'] = pygame.transform.scale(Applejack.images['idle'], (PONY_SIZE, PONY_SIZE))
+			Applejack.images['idle'] = load_image('applejack.png', (PONY_SIZE, PONY_SIZE))
 		
 		self.image = Applejack.images['idle']
 		self.rect = self.image.get_rect()
@@ -39,18 +38,16 @@ class Applejack(pygame.sprite.Sprite):
 	def fireApple(self):
 		targets = self.dpTop.enemiesWithinRange(self.rect.center, self.range)
 		targets = sorted(targets, key=lambda e: e.health)
-		if targets:
+		if targets and not self.ghost:
 			ap = Apple(targets[0], self.dpTop)
 			ap.place(self.rect.center)
 			self.dpTop.sprites.add(ap)
 
-class Apple(pygame.sprite.Sprite):
+class Apple(MovingSprite):
 	images = {}
 	def __init__(self, target, dpTop):
 		print "Apple created!"
-		pygame.sprite.Sprite.__init__(self)
-		
-		
+		MovingSprite.__init__(self, target, 1000)
 		if not Apple.images:
 			Apple.images['idle'] = pygame.image.load(os.path.join('data', 'images', 'apple.png'))
 			Apple.images['idle'].convert_alpha()
@@ -59,8 +56,8 @@ class Apple(pygame.sprite.Sprite):
 		self.image = Apple.images['idle']
 		self.rect = self.image.get_rect()
 		self.target = target
+		
 		self.pos = Vec2d((0,0))
-		self.speed = 1000
 		self.harm = 10
 		self.dpTop = dpTop
 		
@@ -70,12 +67,9 @@ class Apple(pygame.sprite.Sprite):
 		self.rect.center = self.pos
 	
 	def update(self, dTime):
-		if not self.target.alive():
+		MovingSprite.update(self, dTime)
+		if self.target and not self.target.alive():
 			self.kill()
-		velocity = (self.target.rect.center - self.pos).normalized()*self.speed
-		ds = velocity*dTime*1.0/1000
-		self.pos += ds
-		self.place(self.pos)
 		for e in pygame.sprite.spritecollide(self, self.dpTop.enemies, False):
 			e.hurt(self.harm)
 			self.kill()

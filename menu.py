@@ -25,13 +25,13 @@ class Menu:
     lista = []
     pola = []
     rozmiar_fontu = 32
-    font_path = 'data/coders_crux/coders_crux.ttf'
+    font_path = 'data/fonts/ayuma.ttf'
     font = pygame.font.Font
     dest_surface = pygame.Surface
     ilosc_pol = 0
-    kolor_tla = (51,51,51)
-    kolor_tekstu =  (255, 255, 153)
-    kolor_zaznaczenia = (153,102,255)
+    kolor_tla = (51,51,51) #background color -- unselected
+    kolor_tekstu =  (255, 255, 153) #text color
+    kolor_zaznaczenia = (153,102,255) #highlight color
     pozycja_zaznaczenia = 0
     pozycja_wklejenia = (0,0)
     menu_width = 0
@@ -60,6 +60,9 @@ class Menu:
     def get_position(self):
         return self.pozycja_zaznaczenia
     
+    def set_position(self, n):
+        self.pozycja_zaznaczenia = n
+    
     def init(self, lista, dest_surface):
         self.lista = lista
         self.dest_surface = dest_surface
@@ -72,7 +75,7 @@ class Menu:
             if self.pozycja_zaznaczenia == -1:
                 self.pozycja_zaznaczenia = self.ilosc_pol - 1
             self.pozycja_zaznaczenia %= self.ilosc_pol
-        menu = pygame.Surface((self.menu_width, self.menu_height))
+        menu = pygame.Surface((self.menu_width, self.menu_height), flags=SRCALPHA)
         menu.fill(self.kolor_tla)
         zaznaczenie_rect = self.pola[self.pozycja_zaznaczenia].zaznaczenie_rect
         pygame.draw.rect(menu,self.kolor_zaznaczenia,zaznaczenie_rect)
@@ -114,7 +117,7 @@ class Menu:
 
     @staticmethod
     def blockMenu(choices, screen):
-        logo,rect = load_image('logo.png')
+        logo = load_image('logo.png', (400, 500))
         menu = Menu()
         menu.init(choices, screen)
         menu.draw()

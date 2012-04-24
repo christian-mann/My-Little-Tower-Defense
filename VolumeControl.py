@@ -1,14 +1,14 @@
 
 import pygame
 import os
+from helpers import *
 
 class VolumeControl(pygame.sprite.Sprite):
 	images = []
 	def __init__(self, music):
 		pygame.sprite.Sprite.__init__(self)
 
-		self.images = [(s, pygame.image.load(os.path.join('data', 'images', 'volume-'+s+'.png')).convert_alpha()) for s in ['muted', 'low', 'medium', 'high']]
-		self.images = [(s,pygame.transform.scale(i, (32, 32))) for (s,i) in self.images]
+		self.images = [(s, load_image('volume-'+s+'.png', (32, 32))) for s in ['muted', 'low', 'medium', 'high']]
 		self.images = dict(self.images)
 
 		self.music = music
@@ -44,3 +44,4 @@ class VolumeControl(pygame.sprite.Sprite):
 		else:
 			vol = 0
 		self.music.set_volume(vol)
+		print "Music is at " + str(vol)
