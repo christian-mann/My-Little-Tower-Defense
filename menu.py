@@ -25,7 +25,7 @@ class Menu:
     lista = []
     pola = []
     rozmiar_fontu = 32
-    font_path = 'data/fonts/ayuma.ttf'
+    font_path = pygame.font.get_default_font()
     font = pygame.font.Font
     dest_surface = pygame.Surface
     ilosc_pol = 0

@@ -9,18 +9,15 @@ from MovingSprite import MovingSprite
 from AnimatedSprite import AnimatedSprite
 from Pony import Pony
 class Rarity(AnimatedSprite, Pony):
-    sounds = {}
     images = {}
     
-    cost = 100
-    description = "Rarity finds gems! Make sure to click on them to pick them up!"
+    cost = 50
+    description = "Rarity finds gems! Make sure to click on them to pick them up! Cost: "+str(cost)
     def __init__(self, dpTop):
         Pony.__init__(self)
         if not Rarity.images:
             Rarity.images['idle'] = [load_image('rarityWalking-'+str(i)+'.png', (PONY_SIZE, PONY_SIZE)) for i in xrange(24)]
             Rarity.images['attacking'] = load_image('rarityFindingGems.png', (PONY_SIZE, PONY_SIZE))
-        if not Rarity.sounds:
-            Rarity.sounds['attack'] = pygame.mixer.Sound(os.path.join('data', 'audio', 'partyCannon.wav'))
         
         self.images = Rarity.images['idle']
         AnimatedSprite.__init__(self, Rarity.images['idle'], 10)
@@ -32,9 +29,6 @@ class Rarity(AnimatedSprite, Pony):
     
     def place(self, (x,y)):
         self.rect.center = (x,y)
-    
-    def draw(self, surface):
-        print "Foo"
         
     def update(self, dTime):
         Pony.update(self)
@@ -87,6 +81,6 @@ class Gem(MovingSprite):
     def click(self):
         if not self.pickedUp:
             self.speed *= 2
-            self.dpTop.getMoney(5)
+            self.dpTop.getMoney(10)
             self.target = self.dpTop.moneyField
             self.pickedUp = True

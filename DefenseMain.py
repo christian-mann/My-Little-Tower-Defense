@@ -33,7 +33,7 @@ class DefenseMain:
 		self.fHeight = height
 		self.pWidth = self.fWidth*3/4
 		self.pHeight = self.fHeight
-		self.screen = pygame.display.set_mode((self.fWidth, self.fHeight))
+		self.screen = pygame.display.set_mode((self.fWidth, self.fHeight), pygame.FULLSCREEN | pygame.HWSURFACE)
 		self.sprites = pygame.sprite.RenderUpdates()
 		self.towers = pygame.sprite.Group()
 		self.clickables = pygame.sprite.Group()
@@ -44,9 +44,12 @@ class DefenseMain:
 		self.currHover = set()
 		self.money = 0
 		self.health = 100
+		self.background = None
 		
 		self.towerToPlace = None
 		self.gameOver = False
+
+		self.moneyField = Text("")
 		
 		
 		self.enemyPath = [(0.00, 0.10), (0.35, 0.11), (0.37, 0.25), (0.14, 0.45), (0.16, 0.62), (0.28, 0.72), (0.48, 0.70), (0.51, 0.58), (0.47, 0.40), (0.65, 0.11), (0.81, 0.13), (0.78, 0.37), (0.80, 0.68), (0.90, 0.78), (1, 0.78)]
@@ -54,49 +57,37 @@ class DefenseMain:
 		pygame.mixer.init()
 		self.preloadImages()
 	
-	def main(self):
-		pygame.mixer.init()
-		self.preloadImages()
-		self.playMusic(os.path.join('data', 'audio', 'background.mp3'))
-		
-		while True:
-			option = self.mainMenu()
-			
-			if option == 0:
-				self.playGame()
-			elif option == 1:
-				self.showPonies()
-			elif option == 2:
-				self.showEnemies()
-			elif option == 3:
-				self.quitGame()
-	
 	def quitGame(self):
 		pygame.quit()
 		sys.exit(0)
 	
 	def showMessage(self, msg):
-		scrollImage = load_image('scroll.png', (self.fWidth, self.fHeight/2))
+		height = 32*len([c for c in msg if c == '\n']) + 128
+		scrollImage = load_image('scroll.png', (self.fWidth, height))
 		scroll = pygame.sprite.Sprite()
 		scroll.image = scrollImage
 		scroll.rect = scrollImage.get_rect()
-		scroll.bottom = self.fHeight
+		scroll.rect.bottom = self.fHeight
 		
 		pygame.font.init()
 		f = pygame.font.Font(os.path.join('data', 'fonts', 'ayuma.ttf'), 32)
 		textIms = [f.render(m, 1, (0, 0, 0)) for m in msg.split('\n')]
 		for i,im in enumerate(textIms):
-			scroll.image.blit(im, (50, 25+32*i))
+			scroll.image.blit(im, (100, 25+32*i))
 		
-		self.screen.blit(scrollImage, (0, self.fHeight/2))
+		self.screen.blit(scrollImage, scroll.rect)
 		pygame.display.flip()
-		
-		pygame.time.set_timer(pygame.USEREVENT, 5000)
-		while True:
+
+
+
+                pygame.event.clear(pygame.USEREVENT)
+                pygame.time.set_timer(pygame.USEREVENT, 5000)
+                while True:
 			ev = pygame.event.wait()
 			if ev.type in [pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN]:
 				break
 			elif ev.type == pygame.USEREVENT:
+				scroll.kill()
 				break
 			elif ev.type == pygame.QUIT:
 				self.quitGame()
@@ -143,6 +134,7 @@ class DefenseMain:
 		self.refreshScreen(True)
 	
 	def playMusic(self, fname, bg=True):
+		pygame.mixer.init()
 		if bg:
 			if fname:
 				pygame.mixer.init()
@@ -169,8 +161,9 @@ class DefenseMain:
 	def mainMenu(self):
 		self.gameOver = False
 		self.screen.blit(load_image('scroll.png', (self.fWidth, self.fHeight)), (0,0))
+		self.screen.blit(load_image('logo.png', (400, 500)), (self.fWidth/2 + 100, self.fHeight/2 - 250))
 		m = menu.Menu()
-		m.init(["Play Game", "Instructions", "Credits", "Quit"], self.screen)
+		m.init(["Play Game", "Credits", "Quit"], self.screen)
 		m.set_colors((0,0,0), THECOLORS['red'], (0,0,0))
 		m.draw()
 		
@@ -184,9 +177,9 @@ class DefenseMain:
 					elif event.key == K_DOWN:
 						m.draw(1)
 					elif event.key == K_RETURN:
-						return ["Play Game", "Instructions", "Credits", "Quit"][m.get_position()]
+						return ["Play Game", "Credits", "Quit"][m.get_position()]
 					elif event.key == K_ESCAPE:
-						m.set_position(3)
+						self.quitGame()
 				elif event.type == QUIT:
 					self.quitGame()
 			pygame.time.wait(8)
@@ -265,7 +258,7 @@ class DefenseMain:
 			g.updateImages()
 
 	def refreshScreen(self, bg=False):
-		if bg:
+		if bg and self.background:
 			self.screen.blit(self.background, (0,0))
 		self.sprites.clear(self.screen, self.background)
 		changes = self.sprites.draw(self.screen)
@@ -277,18 +270,19 @@ class DefenseMain:
 		self.enemies.add(e)
 	
 	def updateRender(self):
-		dTime = pygame.time.wait(100)
-		self.fpsMeter.st = "Average FPS: %f" % (1000.0/dTime)
+		dTime = pygame.time.wait(10)
+		self.fpsMeter.st = "FPS: %f" % (1000.0/dTime)
 		for event in pygame.event.get():
-			if event.type == pygame.QUIT:
-				sys.exit()
+			if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+				self.quitGame()
 			elif event.type == MOUSEBUTTONDOWN and event.button == 1:
 				if self.towerToPlace and pygame.Rect(0,0,self.pWidth, self.pHeight).collidepoint(event.pos):
 					self.sprites.add(self.towerToPlace)
 					self.towerToPlace.makeNotGhost()
-					self.money -= self.towerToPlace.cost
+					self.setMoney(self.money - self.towerToPlace.cost)
 					self.towerToPlace = None
 				elif self.towerToPlace:
+                                        self.towerToPlace.kill()
 					self.towerToPlace = None
 				for s in self.clickables:
 					if s.rect.collidepoint(event.pos):
@@ -306,7 +300,9 @@ class DefenseMain:
 				self.currHover = hovering
 			elif event.type == KEYDOWN:
 				if event.key == K_ESCAPE:
-					self.towerToPlace = None
+                                        if self.towerToPlace:
+                                                self.towerToPlace.kill()
+                                                self.towerToPlace = None
 
 			if self.health <= 0:
 				self.gameOver = True
@@ -316,23 +312,21 @@ class DefenseMain:
 	
 	def showCredits(self):
 		bg = load_image('cast.png', (self.fWidth, self.fHeight))
-		t = Text("Christian Mann\nMark Denhoed\nRoger Mailler\nReddit")
-		t.size = 32
-		t.color = THECOLORS['white']
-		t.maxArea = (0,0,self.fWidth, self.fHeight)
-		t.justification = 1
-		t.createImage()
+		oldbackground = self.background
+		self.background = bg
+		self.refreshScreen(True)
+		self.playMusic('creditsMusic.mp3')
+		self.showMessage("Christian Mann\nMark Denhoed\nRoger Mailler\nReddit")
 
-		b = Text("Christian Mann\nMark Denhoed\nRoger Mailler\nReddit")
-		b.size = 33
-		b.color = THECOLORS['black']
-		b.maxArea = (0,0,self.fWidth, self.fHeight)
-		b.justification = 1
-		b.createImage()
-
-		#combine the two images
-		creditsImage = pygame.Surface((self.fWidth, self.fHeight), pygame.SRCALPHA)
-
-if __name__ == "__main__":
-	Main = DefenseMain()
-	Main.main()
+                while True:
+                        ev = pygame.event.wait()
+                        if ev.type == KEYDOWN and ev.key == K_ESCAPE:
+                                break
+		self.background = oldbackground
+		self.refreshScreen(True)
+	def resetState(self):
+		self.enemies.empty()
+		self.sprites.empty()
+		self.towers.empty()
+		self.setMoney(100)
+		self.health = 100

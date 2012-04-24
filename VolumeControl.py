@@ -28,7 +28,8 @@ class VolumeControl(pygame.sprite.Sprite):
 			return 'high'
 	
 	def update(self, dTime):
-		self.image = self.images[self.corrImage(self.music.get_volume())]
+                if pygame.mixer.get_init():
+                        self.image = self.images[self.corrImage(self.music.get_volume())]
 	
 	def place(self, (x,y)):
 		self.rect.center = (x,y)

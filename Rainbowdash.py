@@ -8,8 +8,8 @@ from helpers import *
 from Pony import Pony
 class Rainbowdash(Pony):
 	images = {}
-	cost = 100
-	description = "Foobar"
+	cost = 500
+	description = "Rainbowdash swoops in from the skies to clear a line of enemies! Cost: " + str(cost)
 	def __init__(self, dpTop):
 		Pony.__init__(self)
 		self.dpTop = dpTop

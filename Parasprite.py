@@ -40,5 +40,7 @@ class Parasprite(MovingSprite):
 				self.target = self.waypoints[0]
 				del self.waypoints[0]
 			else:
-				self.dpTop.health -= self.harm
+                                self.dpTop.health -= self.harm
+                                self.dpTop.healthField.st = "Health: " + str(self.dpTop.health)
+                                self.dpTop.healthField.createImage()
 				self.kill()

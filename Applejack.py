@@ -9,8 +9,8 @@ from MovingSprite import MovingSprite
 from Pony import Pony
 class Applejack(Pony):
 	images = {}
-	cost = 100
-	description = "foobar"
+	cost = 20
+	description = "Applejack throws apples at the enemies. Cost: " + str(cost)
 
 
 	def __init__(self, dpTop):

@@ -11,7 +11,7 @@ class Pinkie(Pony):
     sounds = {}
     
     cost = 100
-    description = "Pinkie Pie with a Party Cannon!"
+    description = "Pinkie Pie with a Party Cannon! Cost: " + str(cost)
     def __init__(self, dpTop):
         Pony.__init__(self)
         if not Pinkie.images:
@@ -24,7 +24,7 @@ class Pinkie(Pony):
         
         self.image = Pinkie.images['idle']
         self.rect = self.image.get_rect()
-        self.timeTilFire = 1000
+        self.timeTilFire = 2000
         self.attackTime = 500
         self.range = 500
         self.attacking = False

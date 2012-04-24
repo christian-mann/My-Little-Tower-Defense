@@ -11,8 +11,8 @@ from Pony import Pony
 class Derpy(AnimatedSprite, MovingSprite, Pony):
 	frames = []
 	
-	cost = 100
-	description = "Drops anvils on enemies' heads!"
+	cost = 70
+	description = "Derpy drops anvils on enemies' heads! Cost: " + str(cost)
 	def __init__(self, dpTop):
 		Pony.__init__(self)
 		self.dpTop = dpTop
@@ -22,13 +22,12 @@ class Derpy(AnimatedSprite, MovingSprite, Pony):
 
 		self.rect = self.image.get_rect()
 		
-		MovingSprite.__init__(self, None, 1)
+		MovingSprite.__init__(self, None, 200)
 		
-		self.timeTilFire = 1000
 		self.range = 500
 		self.attacking = False
 		
-		self.cooldown = 200
+		self.cooldown = 4000
 	
 	def place(self, (x,y)):
 		self.rect.center = (x,y)
@@ -54,7 +53,7 @@ class Derpy(AnimatedSprite, MovingSprite, Pony):
 				a.place(self.rect.center)
 				self.dpTop.sprites.add(a)
 				
-				self.cooldown = 200
+				self.cooldown = 4000
 		
 class Anvil(pygame.sprite.Sprite):
 	images = {}
